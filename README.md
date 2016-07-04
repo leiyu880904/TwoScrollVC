@@ -1,5 +1,3 @@
-# TwoScrollVC
-类似腾讯新闻的Demo
 创建TRButton类，继承UIButton，实现按钮拖动动画逻辑。
 //拖拽移动过程
 - (void)touchesMoved:(UILongPressGestureRecognizer*)gr

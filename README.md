@@ -1,3 +1,40 @@
+
+1、根据网友大神的一些建议，重写了一些方法，不再重复创建按钮，减少了内存的压力；2、修复了一些bug；3、增加了点击按钮实现删除当前按钮的动画效果和其他按钮的动画移动过程。
+
+- (void)changeCount:(TRButton*)sender
+{
+NSLog(@"buttons = %ld",(unsigned long)self.dragButtons.count);
+if (self.dragButtons.count > 2)
+{
+//如果按钮数组里面的按钮个数大于2时，可以对其进行删除
+//被点击的按钮的中心点
+self.dragCenter=self.center;
+self.dragIndex=[self.dragButtons indexOfObject:self];
+[self removeButton:self];
+//用于判断对象是否拥有参数提供的方法
+if ([self.delegate respondsToSelector:@selector(dragButton1:buttons:)])
+{
+[self.delegate dragButton1:self buttons:self.dragButtons];
+}
+}
+else
+{
+//如果 只剩下两个频道点击不能删除
+for (UIButton* button in self.dragButtons)
+{
+if (button.tag == sender.tag)
+{
+[button setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+}
+else
+{
+[button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+}
+}
+}
+}
+
+
 创建TRButton类，继承UIButton，实现按钮拖动动画逻辑。
 //拖拽移动过程
 - (void)touchesMoved:(UILongPressGestureRecognizer*)gr

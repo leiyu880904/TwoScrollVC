@@ -1,7 +1,7 @@
 # **_1、根据网友大神的一些建议，重写了一些方法，不再重复创建按钮，减少了内存的压力；_**
 # **_2、修复了一些bug；_**
 # **_3、增加了点击按钮实现删除当前按钮的动画效果和其他按钮的动画移动过程。_**
-
+# **_4、为了实现数据让数据在页面跳转的过程中看起来“真实”，采用本地化存储数组的形式保存频道数据。_**
 ```
 - (void)changeCount:(TRButton*)sender
 {
@@ -69,6 +69,24 @@
     [self.dragButtons removeObject:self];
 }
 ```
+```
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+    //建立两个新闻数组 并永久储存
+    NSUserDefaults* newsData = [NSUserDefaults standardUserDefaults];
+    NSArray* array = @[@"佛学",@"军事",@"电竞",@"电视剧",@"纪录片",@"财经",@"娱乐",@"要闻",@"体育",@"汽车",@"图片",@"科技",@"社会"];
+    NSArray* array1 = @[@"时尚",@"游戏",@"房产",@"数码",@"股票",@"国际",@"教育",@"读科学"];
+    NSArray* array2 = @[@"重庆",@"四川",@"上海",@"陕西",@"山东",@"浙江",@"湖北",@"河南",@"湖南",@"福建",@"江苏",@"北京",@"广州",@"深圳"];
+    [newsData setObject:array forKey:@"testArray"];
+    [newsData setObject:array1 forKey:@"testArray1"];
+    [newsData setObject:array2 forKey:@"testArray2"];
+    [[UINavigationBar appearance]setBarTintColor:[UIColor whiteColor]];
+    [[UINavigationBar appearance]setTintColor:[UIColor getColor:@"EF7000"]];
+    [[UINavigationBar appearance]setTitleTextAttributes:@{NSFontAttributeName:[UIFont boldSystemFontOfSize:17],NSForegroundColorAttributeName:[UIColor blackColor]}];
+    return YES;
+}
+```
+
 
 # **_创建TRButton类，继承UIButton，实现按钮拖动动画逻辑。_**
 //拖拽移动过程

@@ -1,41 +1,73 @@
-
 1、根据网友大神的一些建议，重写了一些方法，不再重复创建按钮，减少了内存的压力；
 2、修复了一些bug；
 3、增加了点击按钮实现删除当前按钮的动画效果和其他按钮的动画移动过程。
 
 - (void)changeCount:(TRButton*)sender
 {
-NSLog(@"buttons = %ld",(unsigned long)self.dragButtons.count);
-if (self.dragButtons.count > 2)
-{
-//如果按钮数组里面的按钮个数大于2时，可以对其进行删除
-//被点击的按钮的中心点
-self.dragCenter=self.center;
-self.dragIndex=[self.dragButtons indexOfObject:self];
-[self removeButton:self];
-//用于判断对象是否拥有参数提供的方法
-if ([self.delegate respondsToSelector:@selector(dragButton1:buttons:)])
-{
-[self.delegate dragButton1:self buttons:self.dragButtons];
-}
-}
-else
-{
-//如果 只剩下两个频道点击不能删除
-for (UIButton* button in self.dragButtons)
-{
-if (button.tag == sender.tag)
-{
-[button setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
-}
-else
-{
-[button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-}
-}
-}
+    NSLog(@"buttons = %ld",(unsigned long)self.dragButtons.count);
+    if (self.dragButtons.count > 2)
+    {
+        //如果按钮数组里面的按钮个数大于2时，可以对其进行删除
+        //被点击的按钮的中心点
+        self.dragCenter=self.center;
+        self.dragIndex=[self.dragButtons indexOfObject:self];
+        [self removeButton:self];
+        //用于判断对象是否拥有参数提供的方法
+        if ([self.delegate respondsToSelector:@selector(dragButton1:buttons:)])
+        {
+            [self.delegate dragButton1:self buttons:self.dragButtons];
+        }
+    }
+    else
+    {
+        //如果 只剩下两个频道点击不能删除
+        for (UIButton* button in self.dragButtons)
+        {
+            if (button.tag == sender.tag)
+            {
+                [button setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+            }
+            else
+            {
+                [button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+            }
+        }
+    }
 }
 
+//调整按钮位置
+- (void)removeButton:(UIButton*)dragButton
+{
+    __block CGPoint oldCenter=self.dragCenter;
+    __block CGPoint nextCenter=CGPointZero;
+    //将靠后的按钮移动到靠前的位置
+    for (NSInteger num=self.dragIndex+1; num<self.dragButtons.count; num++)
+    {
+        //执行动画过程
+        [UIView animateWithDuration:0.2 animations:^{
+            UIButton* nextButton=[self.dragButtons objectAtIndex:num];
+            nextCenter=nextButton.center;
+            nextButton.center=oldCenter;
+            oldCenter=nextCenter;
+        }];
+    }
+    self.dragCenter=oldCenter;
+    TRButton* button =(TRButton*)[self.dragButtons lastObject];
+    //实现被删除按钮的 动画特效
+    [UIView animateWithDuration:0.4 delay:0 usingSpringWithDamping:0.6 initialSpringVelocity:0.4 options:UIViewAnimationOptionCurveEaseInOut animations:^{
+        if ([[DataModel getNewsArray][self.currentTitle][@"type"] isEqualToString:@"推荐"])
+        {
+            self.center = CGPointMake((((WIDTH - 2*80)/3) + 80) * 0 + ((WIDTH - 2*80)/3) + 40, button.frame.origin.y + 50 + 30);
+        }
+        else
+        {
+            self.center = CGPointMake((((WIDTH - 2*80)/3) + 80) * 1 + ((WIDTH - 2*80)/3) + 40, button.frame.origin.y + 50 + 30);
+        }
+    } completion:^(BOOL finished) {
+        [self removeFromSuperview];
+    }];
+    [self.dragButtons removeObject:self];
+}
 
 创建TRButton类，继承UIButton，实现按钮拖动动画逻辑。
 //拖拽移动过程

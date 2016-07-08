@@ -5,39 +5,72 @@
 
 - (void)changeCount:(TRButton*)sender
 {
-NSLog(@"buttons = %ld",(unsigned long)self.dragButtons.count);
-if (self.dragButtons.count > 2)
-{
-//如果按钮数组里面的按钮个数大于2时，可以对其进行删除
-//被点击的按钮的中心点
-self.dragCenter=self.center;
-self.dragIndex=[self.dragButtons indexOfObject:self];
-[self removeButton:self];
-//用于判断对象是否拥有参数提供的方法
-if ([self.delegate respondsToSelector:@selector(dragButton1:buttons:)])
-{
-[self.delegate dragButton1:self buttons:self.dragButtons];
-}
-}
-else
-{
-//如果 只剩下两个频道点击不能删除
-for (UIButton* button in self.dragButtons)
-{
-if (button.tag == sender.tag)
-{
-[button setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
-}
-else
-{
-[button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-}
-}
-}
+    NSLog(@"buttons = %ld",(unsigned long)self.dragButtons.count);
+    if (self.dragButtons.count > 2)
+    {
+        //如果按钮数组里面的按钮个数大于2时，可以对其进行删除
+        //被点击的按钮的中心点
+        self.dragCenter=self.center;
+        self.dragIndex=[self.dragButtons indexOfObject:self];
+        [self removeButton:self];
+        //用于判断对象是否拥有参数提供的方法
+        if ([self.delegate respondsToSelector:@selector(dragButton1:buttons:)])
+        {
+            [self.delegate dragButton1:self buttons:self.dragButtons];
+        }
+    }
+    else
+    {
+        //如果 只剩下两个频道点击不能删除
+        for (UIButton* button in self.dragButtons)
+        {
+            if (button.tag == sender.tag)
+            {
+                [button setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+            }
+            else
+            {
+                [button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+            }
+        }
+    }
 }
 
+//调整按钮位置
+- (void)removeButton:(UIButton*)dragButton
+{
+    __block CGPoint oldCenter=self.dragCenter;
+    __block CGPoint nextCenter=CGPointZero;
+    //将靠后的按钮移动到靠前的位置
+    for (NSInteger num=self.dragIndex+1; num<self.dragButtons.count; num++)
+    {
+        //执行动画过程
+        [UIView animateWithDuration:0.2 animations:^{
+            UIButton* nextButton=[self.dragButtons objectAtIndex:num];
+            nextCenter=nextButton.center;
+            nextButton.center=oldCenter;
+            oldCenter=nextCenter;
+        }];
+    }
+    self.dragCenter=oldCenter;
+    TRButton* button =(TRButton*)[self.dragButtons lastObject];
+    //实现被删除按钮的 动画特效
+    [UIView animateWithDuration:0.4 delay:0 usingSpringWithDamping:0.6 initialSpringVelocity:0.4 options:UIViewAnimationOptionCurveEaseInOut animations:^{
+        if ([[DataModel getNewsArray][self.currentTitle][@"type"] isEqualToString:@"推荐"])
+        {
+            self.center = CGPointMake((((WIDTH - 2*80)/3) + 80) * 0 + ((WIDTH - 2*80)/3) + 40, button.frame.origin.y + 50 + 30);
+        }
+        else
+        {
+            self.center = CGPointMake((((WIDTH - 2*80)/3) + 80) * 1 + ((WIDTH - 2*80)/3) + 40, button.frame.origin.y + 50 + 30);
+        }
+    } completion:^(BOOL finished) {
+        [self removeFromSuperview];
+    }];
+    [self.dragButtons removeObject:self];
+}
 
-创建TRButton类，继承UIButton，实现按钮拖动动画逻辑。
+# **创建TRButton类，继承UIButton，实现按钮拖动动画逻辑。**
 //拖拽移动过程
 - (void)touchesMoved:(UILongPressGestureRecognizer*)gr
 {
@@ -117,7 +150,7 @@ else
     self.dragCenter=moveCenter;
 }
 
-定义ButtonsView，把创建好的按钮放到ButtonsView排列好。
+# **定义ButtonsView，把创建好的按钮放到ButtonsView排列好。**
 for (int i = 0; i < self.buttonTitles.count; i++)
     {
         //代表第几行
@@ -156,7 +189,7 @@ push“ButtonsTableViewController”视图控制器的时候，布局界面
     [self.buttonsView createButtons];
 }
 
-首页实现两个滚动视图的交互功能，设计逻辑是：最上面的滚动视图放入按钮数组，最下面的滚动视图加入tableView，滚动的交互实现－－－
+# **首页实现两个滚动视图的交互功能，设计逻辑是：最上面的滚动视图放入按钮数组，最下面的滚动视图加入tableView，滚动的交互实现－－－**
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
     if (scrollView == self.bottomScrollView)
@@ -204,4 +237,6 @@ push“ButtonsTableViewController”视图控制器的时候，布局界面
     }
 }
 
+# **
 如果觉得好的话，可以star一下我的项目，任何好的实现方案及bug，可发我邮箱443465721@qq.com。
+**
